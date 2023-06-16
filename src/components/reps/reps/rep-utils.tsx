@@ -238,10 +238,10 @@ function escapeString(str: string, escapeWhitespace: boolean = false) {
   })}${quote}`;
 }
 
-function wrapRender(renderMethod: (props: {}) => React.ReactNode) {
-  const wrappedFunction = function (this: any, props: {}) {
+function wrapRender<P>(renderMethod: (props: P) => React.JSX.Element) {
+  const wrappedFunction = function (props: P) {
     try {
-      return renderMethod.call(this, props);
+      return renderMethod.call(null, props);
     } catch (e) {
       console.error(e);
       return <span
