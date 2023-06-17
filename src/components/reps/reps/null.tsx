@@ -1,5 +1,5 @@
 import React from "react";
-import { getGripType, wrapRender } from "./rep-utils";
+import { wrapRender } from "./rep-utils";
 
 function Null(props: {
   shouldRenderTooltip?: boolean;

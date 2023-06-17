@@ -15,7 +15,7 @@ interface StringRepProps {
   useQuotes?: boolean,
   escapeWhitespace?: boolean,
   style?: {};
-  cropLimit: number,
+  cropLimit?: number,
   urlCropLimit?: number,
   member?: {open: boolean},
   object: any,
@@ -31,7 +31,7 @@ function StringRep(props: StringRepProps) {
   const {
     className,
     style,
-    cropLimit,
+    cropLimit = 50,
     urlCropLimit,
     object,
     useQuotes = true,

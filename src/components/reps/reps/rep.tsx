@@ -2,14 +2,17 @@ import React from "react"
 
 import * as Undefined from "./undefined"
 import * as Null from "./null"
-import * as StringRep from "./undefined"
+import * as StringRep from "./string"
 import * as Number from "./number"
+import * as SymbolRep from "./symbol"
 import * as InfinityRep from "./infinity"
 import * as NaNRep from "./nan"
+import * as ArrayRep from "./array"
+import * as Obj from "./object"
 
 interface RepType {
     isLongString?: (object: any) => boolean;
-    supportsObject: (object: any, noGrip?: boolean) => boolean;
+    supportsObject: (object?: any, noGrip?: boolean) => boolean;
     rep: (props: any) => React.JSX.Element;
 }
 
@@ -18,19 +21,22 @@ const reps: RepType[] = [
     Null,
     StringRep,
     Number,
+    SymbolRep,
     InfinityRep,
     NaNRep,
 ];
 
-const noGripReps = [StringRep, Number, Undefined, Null];
+const noGripReps: RepType[] = [StringRep, Number, ArrayRep, Undefined, Null, Obj];
 
 const exportedReps: {[k:string]: RepType} = {
-    Undefined,
-    Null,
-    StringRep,
-    Number,
-    InfinityRep,
-    NaNRep,
+  ArrayRep,
+  Undefined,
+  Null,
+  StringRep,
+  Number,
+  InfinityRep,
+  NaNRep,
+  Obj,
 }
 
 function Rep(props: {
@@ -38,6 +44,9 @@ function Rep(props: {
   defaultRep?: RepType;
   noGrip?: boolean;
   mayUseCustomFormatter?: boolean;
+  mode?: symbol;
+  className?: string;
+  cropLimit?: number;
 }) {
   const { object, defaultRep } = props;
   const rep = getRep(
