@@ -47,6 +47,7 @@ function Rep(props: {
   mode?: symbol;
   className?: string;
   cropLimit?: number;
+  isInContentPage?: boolean;
 }) {
   const { object, defaultRep } = props;
   const rep = getRep(
