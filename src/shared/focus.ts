@@ -23,7 +23,7 @@ const focusableSelector = [
  * @return {HTMLElement}
  *         newly focused element
  */
-export function wrapMoveFocus(elms: HTMLElement[], current: HTMLElement, back?: HTMLElement) {
+export function wrapMoveFocus(elms: HTMLElement[], current: HTMLElement, back?: boolean) {
   let next;
 
   if (elms.length === 0) {
@@ -52,7 +52,7 @@ export function wrapMoveFocus(elms: HTMLElement[], current: HTMLElement, back?: 
  *         array of focusable children elements inside the parent
  */
 export function getFocusableElements(parentEl: HTMLElement) {
-  return parentEl
+  return (parentEl
     ? Array.from(parentEl.querySelectorAll(focusableSelector))
-    : [];
+    : []) as HTMLElement[];
 }
