@@ -23,21 +23,23 @@ interface TreeRowMember {
   active?: boolean;
   loading?: boolean;
 }
-type RenderCell = (props: CellProps) => React.ReactNode;
+export type RenderCellFunc = (props: CellProps) => React.ReactNode;
 
 interface TreeRowProps {
   member: TreeRowMember;
   decorator?: {
-    getRowClass?: (o: any) => string|string[]
+    getRowClass?: (o: any) => string|string[];
+    renderLabelCell?: (o: any) => RenderCellFunc;
+    RenderCellFunc?: (o: any, id: string) => RenderCellFunc;
   };
-  renderCell?: RenderCell;
-  renderLabelCell?: RenderCell;
+  RenderCellFunc?: RenderCellFunc;
+  renderLabelCell?: RenderCellFunc;
   columns: {
     id: string;
   }[];
   id: string;
   provider: {
-    getValue: (o: any, id: string) => RenderCell;
+    getValue: (o: any, id: string) => RenderCellFunc;
   };
   onClick: React.MouseEventHandler;
   onContextMenu?: React.MouseEventHandler;
@@ -63,10 +65,10 @@ interface CellProps extends TreeRowProps {
   value: any;
 }
 
-function TreeRow(props: TreeRowProps) {
+export function TreeRow(props: TreeRowProps) {
   const member = props.member;
   const decorator = props.decorator;
-  const treeRowRef = useRef<HTMLElement>();
+  const treeRowRef = useRef<HTMLTableRowElement>(null);
   const observer = useRef<MutationObserver>();
   const setTabbableState = () => {
     const elms = getFocusableElements(treeRowRef.current!);
@@ -140,8 +142,77 @@ function TreeRow(props: TreeRowProps) {
     };
   }, [treeRowRef.current]);
   const classNames = getRowClass(member.object) || [];
-  
-  return <tr>
+  classNames.push("treeRow");
+  classNames.push(member.type + "Row");
+  const currentProps: {
+    "aria-expanded"?: boolean;
+  } = {};
+  if (member.hasChildren) {
+    classNames.push("hasChildren");
 
+    // There are 2 situations where hasChildren is true:
+    // 1. it is an object with children. Only set aria-expanded in this situation
+    // 2. It is a long string (> 50 chars) that can be expanded to fully display it
+    if (member.type !== "string") {
+      currentProps["aria-expanded"] = member.open;
+    }
+  }
+
+  if (member.open) {
+    classNames.push("opened");
+  }
+
+  if (member.loading) {
+    classNames.push("loading");
+  }
+
+  if (member.selected) {
+    classNames.push("selected");
+  }
+
+  if (member.hidden) {
+    classNames.push("hidden");
+  }
+
+  const cells: React.ReactNode[] = [];
+  let RenderCellFunc = props.RenderCellFunc || TreeCell;
+  let renderLabelCell: RenderCellFunc = props.renderLabelCell || LabelCell as RenderCellFunc;
+  if (decorator?.renderLabelCell) {
+    renderLabelCell = decorator.renderLabelCell(member.object) || renderLabelCell as RenderCellFunc;
+  }
+
+  // Render a cell for every column.
+  props.columns.forEach(col => {
+    const cellProps = Object.assign({}, props, {
+      key: col.id,
+      id: col.id,
+      value: props.provider.getValue(member.object, col.id),
+    });
+
+    if (decorator?.RenderCellFunc) {
+      RenderCellFunc = decorator.RenderCellFunc(member.object, col.id);
+    }
+    const Render = col.id == "default" ? renderLabelCell : RenderCellFunc as RenderCellFunc;
+    if (Render) {
+      cells.push(
+        <Render {...cellProps}/>
+      );
+    }
+  });
+  return <tr
+    id={props.id}
+    ref={treeRowRef}
+    role="treeitem"
+    aria-level={member.level + 1}
+    aria-selected={!!member.selected}
+    onClick={props.onClick}
+    onContextMenu={props.onContextMenu}
+    onKeyDownCapture={member.active ? onKeyDown : undefined}
+    onMouseOver={props.onMouseOver}
+    onMouseOut={props.onMouseOut}
+    className={classNames.join(" ")}
+    {...currentProps}
+  >
+    {...cells}
   </tr>
 }

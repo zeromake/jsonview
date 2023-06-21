@@ -1,12 +1,14 @@
 import React, { Component } from "react"
 
+export type RenderValueFunc = (props: TreeCellProps) => string;
+
 interface TreeCellProps {
   value: any;
   object?: any;
   type?: string;
   decorator?: {
     getCellClass?: (o: any, id: string) => string[]|string;
-    renderValue?: (o: any, id: string) => (((props: TreeCellProps) => string)|undefined);
+    renderValue?: (o: any, id: string) => (RenderValueFunc|undefined);
   };
   id: string;
   member: {
@@ -14,7 +16,7 @@ interface TreeCellProps {
     open?: boolean;
     type?: string;
   };
-  renderValue: (props: TreeCellProps) => string;
+  renderValue: RenderValueFunc;
   enableInput?: boolean;
 }
 
